@@ -1,7 +1,7 @@
 # MortgageFlow
 
-[![CI](https://github.com/mariano-aguero/aws-example/actions/workflows/ci.yml/badge.svg)](https://github.com/mariano-aguero/aws-example/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/mariano-aguero/aws-example/branch/main/graph/badge.svg)](https://codecov.io/gh/mariano-aguero/aws-example)
+[![CI](https://github.com/mariano-aguero/mortgage-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/mariano-aguero/mortgage-platform/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/mariano-aguero/mortgage-platform/branch/main/graph/badge.svg)](https://codecov.io/gh/mariano-aguero/mortgage-platform)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18.3-61DAFB?logo=react)](https://react.dev/)
 [![AWS](https://img.shields.io/badge/AWS-Serverless-FF9900?logo=amazon-aws)](https://aws.amazon.com/)
@@ -155,7 +155,7 @@ sequenceDiagram
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/mariano-aguero/aws-example.git
+git clone https://github.com/mariano-aguero/mortgage-platform.git
 cd mortgage-platform
 
 # 2. Install dependencies (installs all packages)
@@ -719,8 +719,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/mariano-aguero/aws-example/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/mariano-aguero/aws-example/discussions)
+- **Issues**: [GitHub Issues](https://github.com/mariano-aguero/mortgage-platform/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/mariano-aguero/mortgage-platform/discussions)
 
 ---
 

@@ -5,7 +5,7 @@
   "description": "MortgageFlow - Digital Mortgage Application Platform",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mariano-aguero/aws-example.git"
+    "url": "https://github.com/mariano-aguero/mortgage-platform.git"
   },
   "author": "MortgageFlow Team",
   "license": "MIT",
