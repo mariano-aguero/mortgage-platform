@@ -1,12 +1,13 @@
 # MortgageFlow
 
 [![CI](https://github.com/mariano-aguero/mortgage-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/mariano-aguero/mortgage-platform/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/mariano-aguero/mortgage-platform/branch/main/graph/badge.svg)](https://codecov.io/gh/mariano-aguero/mortgage-platform)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18.3-61DAFB?logo=react)](https://react.dev/)
 [![AWS](https://img.shields.io/badge/AWS-Serverless-FF9900?logo=amazon-aws)](https://aws.amazon.com/)
 [![Terraform](https://img.shields.io/badge/Terraform-1.5+-7B42BC?logo=terraform)](https://www.terraform.io/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+> **Note:** This is a playground/sandbox repository for learning and experimentation purposes. It demonstrates AWS serverless architecture patterns, React development, and infrastructure as code with Terraform. Not intended for production use.
 
 **Digital Mortgage Application Platform** - A modern, serverless mortgage lending platform that streamlines the loan application process for borrowers and loan officers.
 
