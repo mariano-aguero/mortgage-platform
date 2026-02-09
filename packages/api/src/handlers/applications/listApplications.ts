@@ -54,9 +54,9 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       const results = await Promise.all(
         statusesToFetch.map((status) => listApplicationsByStatus(status, limit)),
       );
-      items = results.flat().sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      );
+      items = results
+        .flat()
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     } else {
       items = await listApplicationsByUser(user.userId);
     }
