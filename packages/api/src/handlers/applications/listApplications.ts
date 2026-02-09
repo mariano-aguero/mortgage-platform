@@ -42,7 +42,21 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       }
       items = await listApplicationsByStatus(statusFilter as ApplicationStatus, limit);
     } else if (hasElevatedRole(user)) {
-      items = await listApplicationsByStatus(ApplicationStatus.SUBMITTED, limit);
+      // Loan officers and admins see all applications except DRAFT
+      const statusesToFetch = [
+        ApplicationStatus.SUBMITTED,
+        ApplicationStatus.UNDER_REVIEW,
+        ApplicationStatus.DOCUMENTS_REQUESTED,
+        ApplicationStatus.APPROVED,
+        ApplicationStatus.DENIED,
+        ApplicationStatus.WITHDRAWN,
+      ];
+      const results = await Promise.all(
+        statusesToFetch.map((status) => listApplicationsByStatus(status, limit)),
+      );
+      items = results.flat().sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
     } else {
       items = await listApplicationsByUser(user.userId);
     }
