@@ -11,6 +11,13 @@ export default defineConfig({
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     testTimeout: 5000,
     hookTimeout: 5000,
+    env: {
+      VITE_API_URL: 'http://localhost:3000',
+      VITE_ENVIRONMENT: 'test',
+      VITE_COGNITO_USER_POOL_ID: 'us-east-1_test',
+      VITE_COGNITO_APP_CLIENT_ID: 'test-client-id',
+      VITE_AWS_REGION: 'us-east-1',
+    },
     coverage: {
       reporter: ['text', 'lcov', 'html'],
       exclude: ['node_modules/', 'src/test/'],
