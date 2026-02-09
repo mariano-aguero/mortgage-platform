@@ -9,13 +9,13 @@ import {
 import type { MortgageApplication, ApplicationStatus } from '../types';
 
 // Configure DynamoDB client - use LocalStack endpoint for local development
-const isLocal = process.env.ENVIRONMENT === 'local' || process.env.NODE_ENV === 'local';
-const localstackEndpoint = process.env.LOCALSTACK_ENDPOINT ?? 'http://localhost:4566';
+const isLocal = process.env['ENVIRONMENT'] === 'local' || process.env['NODE_ENV'] === 'local';
+const localstackEndpoint = process.env['LOCALSTACK_ENDPOINT'] ?? 'http://localhost:4566';
 
 const client = new DynamoDBClient({
   ...(isLocal && {
     endpoint: localstackEndpoint,
-    region: process.env.AWS_REGION ?? 'us-east-1',
+    region: process.env['AWS_REGION'] ?? 'us-east-1',
     credentials: {
       accessKeyId: 'test',
       secretAccessKey: 'test',

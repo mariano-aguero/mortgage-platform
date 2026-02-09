@@ -33,13 +33,13 @@ describe('createApplicationSchema', () => {
     expect(result.success).toBe(true);
   });
 
-  it('should fail if userId is missing', () => {
-    const invalid = {
+  it('should validate without userId (userId comes from authenticated user)', () => {
+    const withoutUserId = {
       borrowerInfo: validInput.borrowerInfo,
       propertyInfo: validInput.propertyInfo,
     };
-    const result = createApplicationSchema.safeParse(invalid);
-    expect(result.success).toBe(false);
+    const result = createApplicationSchema.safeParse(withoutUserId);
+    expect(result.success).toBe(true);
   });
 
   it('should fail if borrowerInfo email is invalid', () => {

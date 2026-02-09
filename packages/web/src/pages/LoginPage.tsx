@@ -11,7 +11,7 @@ import { useAuthContext } from '@/context/AuthContext';
 
 // Check if running in local development with mock auth
 const isLocalDevMode =
-  import.meta.env.VITE_SKIP_AUTH === 'true' && import.meta.env.VITE_ENVIRONMENT === 'local';
+  import.meta.env['VITE_SKIP_AUTH'] === 'true' && import.meta.env['VITE_ENVIRONMENT'] === 'local';
 
 const LoginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),

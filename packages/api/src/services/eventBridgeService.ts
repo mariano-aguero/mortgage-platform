@@ -2,13 +2,13 @@ import { EventBridgeClient, PutEventsCommand } from '@aws-sdk/client-eventbridge
 import type { ApplicationStatus } from '../types';
 
 // Configure EventBridge client - use LocalStack endpoint for local development
-const isLocal = process.env.ENVIRONMENT === 'local' || process.env.NODE_ENV === 'local';
-const localstackEndpoint = process.env.LOCALSTACK_ENDPOINT ?? 'http://localhost:4566';
+const isLocal = process.env['ENVIRONMENT'] === 'local' || process.env['NODE_ENV'] === 'local';
+const localstackEndpoint = process.env['LOCALSTACK_ENDPOINT'] ?? 'http://localhost:4566';
 
 const client = new EventBridgeClient({
   ...(isLocal && {
     endpoint: localstackEndpoint,
-    region: process.env.AWS_REGION ?? 'us-east-1',
+    region: process.env['AWS_REGION'] ?? 'us-east-1',
     credentials: {
       accessKeyId: 'test',
       secretAccessKey: 'test',

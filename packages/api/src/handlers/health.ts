@@ -10,8 +10,8 @@ export const handler: APIGatewayProxyHandler = async (): Promise<APIGatewayProxy
     body: JSON.stringify({
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      version: process.env.npm_package_version || '1.0.0',
-      environment: process.env.ENVIRONMENT || 'unknown',
+      version: process.env['npm_package_version'] ?? '1.0.0',
+      environment: process.env['ENVIRONMENT'] ?? 'unknown',
     }),
   };
 };

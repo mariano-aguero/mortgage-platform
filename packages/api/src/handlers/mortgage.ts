@@ -2,7 +2,6 @@ import type { APIGatewayProxyHandler } from 'aws-lambda';
 import { MortgageApplicationSchema } from '@models/mortgage.schema';
 import type { ApiResponse } from '../types';
 
-// eslint-disable-next-line @typescript-eslint/require-await -- Lambda handler requires async signature
 export const create: APIGatewayProxyHandler = async (event) => {
   try {
     const body: unknown = event.body !== null ? JSON.parse(event.body) : {};

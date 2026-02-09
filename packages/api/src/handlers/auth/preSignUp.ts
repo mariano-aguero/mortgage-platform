@@ -1,7 +1,6 @@
 import type { PreSignUpTriggerHandler, PreSignUpTriggerEvent } from 'aws-lambda';
 import * as logger from '../../utils/logger';
 
-// eslint-disable-next-line @typescript-eslint/require-await -- Cognito trigger requires async handler
 export const handler: PreSignUpTriggerHandler = async (event: PreSignUpTriggerEvent) => {
   const { userName, request } = event;
 

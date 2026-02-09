@@ -9,7 +9,7 @@ export interface AuthenticatedUser {
 }
 
 // Check if running in local development mode
-const isLocalDev = process.env.ENVIRONMENT === 'local' || process.env.NODE_ENV === 'local';
+const isLocalDev = process.env['ENVIRONMENT'] === 'local' || process.env['NODE_ENV'] === 'local';
 
 /**
  * Parse mock JWT token for local development
@@ -22,6 +22,9 @@ function parseMockToken(authHeader: string): Record<string, unknown> | null {
       return null;
     }
     const payloadBase64 = token.split('.')[1];
+    if (!payloadBase64) {
+      return null;
+    }
     const payload = JSON.parse(Buffer.from(payloadBase64, 'base64').toString('utf-8'));
     return payload;
   } catch {
