@@ -1,0 +1,377 @@
+##############################################################################
+# Mortgage Platform API - Serverless Framework Configuration
+##############################################################################
+# Deploy commands:
+#   Local:      pnpm sls offline --stage local
+#   Dev:        pnpm sls deploy --stage dev
+#   Staging:    pnpm sls deploy --stage staging
+#   Production: pnpm sls deploy --stage prod
+##############################################################################
+
+service: mortgage-platform-api
+frameworkVersion: '3'
+
+##############################################################################
+# Provider Configuration
+##############################################################################
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: ${opt:region, 'us-east-1'}
+  stage: ${opt:stage, 'dev'}
+  memorySize: 256
+  timeout: 30
+  architecture: arm64
+
+  # CloudWatch Logs Configuration
+  logRetentionInDays: 14
+
+  # Environment Variables (available in all functions)
+  environment:
+    NODE_ENV: ${self:provider.stage}
+    ENVIRONMENT: ${self:provider.stage}
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
+    # Infrastructure references (from Terraform via SSM or env file)
+    DYNAMODB_TABLE: ${self:custom.vars.DYNAMODB_TABLE}
+    S3_BUCKET_DOCUMENTS: ${self:custom.vars.S3_BUCKET_DOCUMENTS}
+    SQS_QUEUE_URL: ${self:custom.vars.SQS_QUEUE_URL}
+    SQS_QUEUE_ARN: ${self:custom.vars.SQS_QUEUE_ARN}
+    EVENT_BUS_NAME: ${self:custom.vars.EVENT_BUS_NAME}
+    COGNITO_USER_POOL_ID: ${self:custom.vars.COGNITO_USER_POOL_ID}
+    COGNITO_APP_CLIENT_ID: ${self:custom.vars.COGNITO_APP_CLIENT_ID}
+    WEBHOOK_SECRET: ${self:custom.vars.WEBHOOK_SECRET}
+
+  # IAM Role Statements (inline permissions)
+  iam:
+    role:
+      statements:
+        # DynamoDB permissions
+        - Effect: Allow
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+            - dynamodb:Query
+            - dynamodb:Scan
+          Resource:
+            - !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${self:custom.vars.DYNAMODB_TABLE}'
+            - !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${self:custom.vars.DYNAMODB_TABLE}/index/*'
+        # S3 permissions
+        - Effect: Allow
+          Action:
+            - s3:GetObject
+            - s3:PutObject
+            - s3:DeleteObject
+            - s3:ListBucket
+          Resource:
+            - !Sub 'arn:aws:s3:::${self:custom.vars.S3_BUCKET_DOCUMENTS}'
+            - !Sub 'arn:aws:s3:::${self:custom.vars.S3_BUCKET_DOCUMENTS}/*'
+        # SQS permissions
+        - Effect: Allow
+          Action:
+            - sqs:SendMessage
+            - sqs:ReceiveMessage
+            - sqs:DeleteMessage
+            - sqs:GetQueueAttributes
+          Resource:
+            - ${self:custom.vars.SQS_QUEUE_ARN}
+        # EventBridge permissions
+        - Effect: Allow
+          Action:
+            - events:PutEvents
+          Resource:
+            - !Sub 'arn:aws:events:${AWS::Region}:${AWS::AccountId}:event-bus/${self:custom.vars.EVENT_BUS_NAME}'
+        # CloudWatch Logs permissions
+        - Effect: Allow
+          Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+          Resource:
+            - !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${self:service}-${self:provider.stage}-*:*'
+
+##############################################################################
+# Plugins
+##############################################################################
+plugins:
+  - serverless-esbuild
+  - serverless-offline
+  - serverless-localstack
+  - serverless-dotenv-plugin
+
+##############################################################################
+# Custom Configuration
+##############################################################################
+custom:
+  # Dotenv plugin configuration
+  dotenv:
+    path: .env.${self:provider.stage}
+    include: []
+
+  # LocalStack configuration (for local development)
+  localstack:
+    stages:
+      - local
+    host: http://localhost
+    edgePort: 4566
+    autostart: false
+    networks:
+      - host
+    lambda:
+      mountCode: false
+
+  # esbuild configuration (TypeScript bundling)
+  esbuild:
+    bundle: true
+    minify: ${self:custom.esbuildMinify.${self:provider.stage}, true}
+    sourcemap: true
+    exclude:
+      - '@aws-sdk/*'
+    target: node20
+    platform: node
+    concurrency: 10
+    watch:
+      pattern:
+        - 'src/**/*.ts'
+      ignore:
+        - 'src/**/*.test.ts'
+
+  # Minify settings per stage
+  esbuildMinify:
+    local: false
+    dev: false
+    staging: true
+    prod: true
+
+  # Serverless Offline configuration
+  serverless-offline:
+    httpPort: 3000
+    lambdaPort: 3002
+    noPrependStageInUrl: true
+
+  # CORS configuration (shared across all HTTP endpoints)
+  corsConfig:
+    origin: '*'
+    headers:
+      - Content-Type
+      - Authorization
+      - X-Amz-Date
+      - X-Api-Key
+      - X-Amz-Security-Token
+      - X-Amz-User-Agent
+      - X-Webhook-Signature
+    allowCredentials: false
+
+  # Cognito Authorizer configuration (shared across protected endpoints)
+  cognitoAuthorizer:
+    name: cognitoAuthorizer
+    type: COGNITO_USER_POOLS
+    arn: ${self:custom.vars.COGNITO_USER_POOL_ARN}
+    claims:
+      - sub
+      - email
+      - cognito:groups
+
+  # Environment variables per stage
+  vars:
+    # Local development (LocalStack)
+    local:
+      DYNAMODB_TABLE: ${env:DYNAMODB_TABLE, 'mortgage-platform-local-applications'}
+      S3_BUCKET_DOCUMENTS: ${env:S3_BUCKET_DOCUMENTS, 'mortgage-platform-local-documents'}
+      SQS_QUEUE_URL: ${env:SQS_QUEUE_URL, 'http://localhost:4566/000000000000/mortgage-platform-local-queue'}
+      SQS_QUEUE_ARN: ${env:SQS_QUEUE_ARN, 'arn:aws:sqs:us-east-1:000000000000:mortgage-platform-local-queue'}
+      EVENT_BUS_NAME: ${env:EVENT_BUS_NAME, 'mortgage-platform-local-events'}
+      COGNITO_USER_POOL_ID: ${env:COGNITO_USER_POOL_ID, 'us-east-1_local'}
+      COGNITO_APP_CLIENT_ID: ${env:COGNITO_APP_CLIENT_ID, 'local_client'}
+      COGNITO_USER_POOL_ARN: ${env:COGNITO_USER_POOL_ARN, 'arn:aws:cognito-idp:us-east-1:000000000000:userpool/us-east-1_local'}
+      WEBHOOK_SECRET: ${env:WEBHOOK_SECRET, 'local-webhook-secret-change-me'}
+
+    # Development environment (AWS) - SSM parameters with fallbacks for local dev
+    dev:
+      DYNAMODB_TABLE: ${ssm:/mortgage-platform/dev/dynamodb_table_name, 'mortgage-platform-dev-applications'}
+      S3_BUCKET_DOCUMENTS: ${ssm:/mortgage-platform/dev/s3_bucket_documents_name, 'mortgage-platform-dev-documents'}
+      SQS_QUEUE_URL: ${ssm:/mortgage-platform/dev/sqs_queue_url, ''}
+      SQS_QUEUE_ARN: ${ssm:/mortgage-platform/dev/sqs_queue_arn, 'arn:aws:sqs:us-east-1:000000000000:mortgage-platform-dev-queue'}
+      EVENT_BUS_NAME: ${ssm:/mortgage-platform/dev/event_bus_name, 'mortgage-platform-dev-events'}
+      COGNITO_USER_POOL_ID: ${ssm:/mortgage-platform/dev/user_pool_id, ''}
+      COGNITO_APP_CLIENT_ID: ${ssm:/mortgage-platform/dev/app_client_id, ''}
+      COGNITO_USER_POOL_ARN: ${ssm:/mortgage-platform/dev/user_pool_arn, 'arn:aws:cognito-idp:us-east-1:000000000000:userpool/us-east-1_dev'}
+      WEBHOOK_SECRET: ${ssm:/mortgage-platform/dev/webhook_secret, 'dev-webhook-secret'}
+
+    # Staging environment (AWS) - SSM parameters with fallbacks for local dev
+    staging:
+      DYNAMODB_TABLE: ${ssm:/mortgage-platform/staging/dynamodb_table_name, 'mortgage-platform-staging-applications'}
+      S3_BUCKET_DOCUMENTS: ${ssm:/mortgage-platform/staging/s3_bucket_documents_name, 'mortgage-platform-staging-documents'}
+      SQS_QUEUE_URL: ${ssm:/mortgage-platform/staging/sqs_queue_url, ''}
+      SQS_QUEUE_ARN: ${ssm:/mortgage-platform/staging/sqs_queue_arn, 'arn:aws:sqs:us-east-1:000000000000:mortgage-platform-staging-queue'}
+      EVENT_BUS_NAME: ${ssm:/mortgage-platform/staging/event_bus_name, 'mortgage-platform-staging-events'}
+      COGNITO_USER_POOL_ID: ${ssm:/mortgage-platform/staging/user_pool_id, ''}
+      COGNITO_APP_CLIENT_ID: ${ssm:/mortgage-platform/staging/app_client_id, ''}
+      COGNITO_USER_POOL_ARN: ${ssm:/mortgage-platform/staging/user_pool_arn, 'arn:aws:cognito-idp:us-east-1:000000000000:userpool/us-east-1_staging'}
+      WEBHOOK_SECRET: ${ssm:/mortgage-platform/staging/webhook_secret, 'staging-webhook-secret'}
+
+    # Production environment (AWS) - SSM parameters with fallbacks for local dev
+    prod:
+      DYNAMODB_TABLE: ${ssm:/mortgage-platform/prod/dynamodb_table_name, 'mortgage-platform-prod-applications'}
+      S3_BUCKET_DOCUMENTS: ${ssm:/mortgage-platform/prod/s3_bucket_documents_name, 'mortgage-platform-prod-documents'}
+      SQS_QUEUE_URL: ${ssm:/mortgage-platform/prod/sqs_queue_url, ''}
+      SQS_QUEUE_ARN: ${ssm:/mortgage-platform/prod/sqs_queue_arn, 'arn:aws:sqs:us-east-1:000000000000:mortgage-platform-prod-queue'}
+      EVENT_BUS_NAME: ${ssm:/mortgage-platform/prod/event_bus_name, 'mortgage-platform-prod-events'}
+      COGNITO_USER_POOL_ID: ${ssm:/mortgage-platform/prod/user_pool_id, ''}
+      COGNITO_APP_CLIENT_ID: ${ssm:/mortgage-platform/prod/app_client_id, ''}
+      COGNITO_USER_POOL_ARN: ${ssm:/mortgage-platform/prod/user_pool_arn, 'arn:aws:cognito-idp:us-east-1:000000000000:userpool/us-east-1_prod'}
+      WEBHOOK_SECRET: ${ssm:/mortgage-platform/prod/webhook_secret, 'prod-webhook-secret'}
+
+    # Variable resolution (selects based on current stage)
+    DYNAMODB_TABLE: ${self:custom.vars.${self:provider.stage}.DYNAMODB_TABLE}
+    S3_BUCKET_DOCUMENTS: ${self:custom.vars.${self:provider.stage}.S3_BUCKET_DOCUMENTS}
+    SQS_QUEUE_URL: ${self:custom.vars.${self:provider.stage}.SQS_QUEUE_URL}
+    SQS_QUEUE_ARN: ${self:custom.vars.${self:provider.stage}.SQS_QUEUE_ARN}
+    EVENT_BUS_NAME: ${self:custom.vars.${self:provider.stage}.EVENT_BUS_NAME}
+    COGNITO_USER_POOL_ID: ${self:custom.vars.${self:provider.stage}.COGNITO_USER_POOL_ID}
+    COGNITO_APP_CLIENT_ID: ${self:custom.vars.${self:provider.stage}.COGNITO_APP_CLIENT_ID}
+    COGNITO_USER_POOL_ARN: ${self:custom.vars.${self:provider.stage}.COGNITO_USER_POOL_ARN}
+    WEBHOOK_SECRET: ${self:custom.vars.${self:provider.stage}.WEBHOOK_SECRET}
+
+##############################################################################
+# Lambda Functions
+##############################################################################
+functions:
+  ##########################################################################
+  # Health Check
+  ##########################################################################
+  health:
+    handler: src/handlers/health.handler
+    description: Health check endpoint
+    events:
+      - http:
+          path: health
+          method: get
+          cors: ${self:custom.corsConfig}
+
+  ##########################################################################
+  # Application CRUD Handlers
+  ##########################################################################
+  createApplication:
+    handler: src/handlers/applications/createApplication.handler
+    description: Create a new mortgage application
+    events:
+      - http:
+          path: applications
+          method: post
+          cors: ${self:custom.corsConfig}
+          authorizer: ${self:custom.cognitoAuthorizer}
+
+  getApplication:
+    handler: src/handlers/applications/getApplication.handler
+    description: Get a mortgage application by ID
+    events:
+      - http:
+          path: applications/{applicationId}
+          method: get
+          cors: ${self:custom.corsConfig}
+          authorizer: ${self:custom.cognitoAuthorizer}
+
+  listApplications:
+    handler: src/handlers/applications/listApplications.handler
+    description: List mortgage applications (by user or by status)
+    events:
+      - http:
+          path: applications
+          method: get
+          cors: ${self:custom.corsConfig}
+          authorizer: ${self:custom.cognitoAuthorizer}
+
+  updateApplicationStatus:
+    handler: src/handlers/applications/updateApplicationStatus.handler
+    description: Update the status of a mortgage application
+    events:
+      - http:
+          path: applications/{applicationId}/status
+          method: patch
+          cors: ${self:custom.corsConfig}
+          authorizer: ${self:custom.cognitoAuthorizer}
+
+  ##########################################################################
+  # Async Processors
+  ##########################################################################
+  applicationProcessor:
+    handler: src/handlers/processors/applicationProcessor.handler
+    description: Process application status changes from SQS
+    timeout: 60
+    events:
+      - sqs:
+          arn: ${self:custom.vars.SQS_QUEUE_ARN}
+          batchSize: 10
+          maximumBatchingWindow: 5
+          functionResponseType: ReportBatchItemFailures
+
+  ##########################################################################
+  # Webhook Handlers
+  ##########################################################################
+  statusChangeWebhook:
+    handler: src/handlers/webhooks/statusChangeWebhook.handler
+    description: Receive external status change notifications via webhook
+    events:
+      - http:
+          path: webhooks/status-change
+          method: post
+          cors: ${self:custom.corsConfig}
+          # No authorizer - uses HMAC signature verification
+
+  ##########################################################################
+  # Cognito Triggers
+  ##########################################################################
+  preSignUp:
+    handler: src/handlers/auth/preSignUp.handler
+    description: Cognito Pre Sign-Up trigger for auto-confirmation
+    events:
+      - cognitoUserPool:
+          pool: ${self:custom.vars.COGNITO_USER_POOL_ID}
+          trigger: PreSignUp
+          existing: true
+
+##############################################################################
+# CloudFormation Resources
+##############################################################################
+resources:
+  Resources:
+    # API Gateway Response for 4XX errors (with CORS headers)
+    GatewayResponseDefault4XX:
+      Type: AWS::ApiGateway::GatewayResponse
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+          gatewayresponse.header.Access-Control-Allow-Methods: "'GET,POST,PUT,PATCH,DELETE,OPTIONS'"
+        ResponseType: DEFAULT_4XX
+        RestApiId:
+          Ref: ApiGatewayRestApi
+
+    # API Gateway Response for 5XX errors (with CORS headers)
+    GatewayResponseDefault5XX:
+      Type: AWS::ApiGateway::GatewayResponse
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+          gatewayresponse.header.Access-Control-Allow-Methods: "'GET,POST,PUT,PATCH,DELETE,OPTIONS'"
+        ResponseType: DEFAULT_5XX
+        RestApiId:
+          Ref: ApiGatewayRestApi
+
+  # CloudFormation Outputs
+  Outputs:
+    ApiGatewayUrl:
+      Description: API Gateway endpoint URL
+      Value:
+        Fn::Sub: 'https://${ApiGatewayRestApi}.execute-api.${AWS::Region}.amazonaws.com/${self:provider.stage}'
+      Export:
+        Name: ${self:service}-${self:provider.stage}-ApiUrl
+
+    ServiceName:
+      Description: Service name
+      Value: ${self:service}
+      Export:
+        Name: ${self:service}-${self:provider.stage}-ServiceName

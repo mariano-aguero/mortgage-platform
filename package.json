@@ -1,0 +1,45 @@
+{
+  "name": "mortgage-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MortgageFlow - Digital Mortgage Application Platform",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/mortgage-platform.git"
+  },
+  "author": "MortgageFlow Team",
+  "license": "MIT",
+  "scripts": {
+    "build": "pnpm -r build",
+    "build:shared": "pnpm --filter @mortgage-platform/shared build",
+    "build:api": "pnpm --filter @mortgage-platform/api build",
+    "build:web": "pnpm --filter @mortgage-platform/web build",
+    "dev": "pnpm --filter @mortgage-platform/api dev",
+    "dev:web": "pnpm --filter @mortgage-platform/web dev",
+    "dev:api": "pnpm --filter @mortgage-platform/api dev",
+    "test": "pnpm -r test",
+    "test:api": "pnpm --filter @mortgage-platform/api test",
+    "test:web": "pnpm --filter @mortgage-platform/web test",
+    "test:coverage": "pnpm -r test:coverage",
+    "lint": "pnpm -r lint",
+    "lint:fix": "pnpm -r lint:fix",
+    "format": "pnpm -r format",
+    "format:check": "pnpm -r format:check",
+    "typecheck": "pnpm -r typecheck",
+    "validate": "pnpm lint && pnpm typecheck && pnpm test",
+    "clean": "pnpm -r clean && rm -rf node_modules",
+    "prepare": "pnpm build:shared",
+    "deploy:dev": "pnpm --filter @mortgage-platform/api deploy:dev",
+    "deploy:staging": "pnpm --filter @mortgage-platform/api deploy:staging",
+    "deploy:prod": "pnpm --filter @mortgage-platform/api deploy:prod"
+  },
+  "devDependencies": {
+    "prettier": "^3.1.0",
+    "typescript": "^5.3.2"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@8.15.0"
+}

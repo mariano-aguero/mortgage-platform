@@ -1,0 +1,50 @@
+# IDE
+.idea
+.vscode
+
+# Claude Code
+.claude
+
+# Dependencies
+node_modules
+
+# Build output
+dist
+.build
+.esbuild
+.serverless
+
+# Environment files (keep .env.example and .env.dev for documentation/tests)
+.env
+.env.local
+.env.staging
+.env.prod
+!.env.example
+!.env.dev
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test coverage
+coverage
+
+# Temporary files
+*.tmp
+*.temp
+
+# LocalStack data
+.localstack
+
+# Terraform
+.terraform
+*.tfstate
+*.tfstate.backup
+.terraform.lock.hcl
+
