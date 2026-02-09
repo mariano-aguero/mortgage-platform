@@ -24,7 +24,10 @@ export const VALID_STATUS_TRANSITIONS: Record<ApplicationStatus, ApplicationStat
     ApplicationStatus.APPROVED,
     ApplicationStatus.DENIED,
   ],
-  [ApplicationStatus.DOCUMENTS_REQUESTED]: [ApplicationStatus.SUBMITTED, ApplicationStatus.WITHDRAWN],
+  [ApplicationStatus.DOCUMENTS_REQUESTED]: [
+    ApplicationStatus.SUBMITTED,
+    ApplicationStatus.WITHDRAWN,
+  ],
   [ApplicationStatus.APPROVED]: [ApplicationStatus.WITHDRAWN],
   [ApplicationStatus.DENIED]: [],
   [ApplicationStatus.WITHDRAWN]: [],
@@ -171,13 +174,7 @@ export type PropertyType = (typeof PROPERTY_TYPES)[number];
 /**
  * Loan Types
  */
-export const LOAN_TYPES = [
-  'Conventional',
-  'FHA',
-  'VA',
-  'USDA',
-  'Jumbo',
-] as const;
+export const LOAN_TYPES = ['Conventional', 'FHA', 'VA', 'USDA', 'Jumbo'] as const;
 
 export type LoanType = (typeof LOAN_TYPES)[number];
 

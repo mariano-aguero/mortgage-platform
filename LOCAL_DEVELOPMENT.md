@@ -18,8 +18,8 @@ Before starting, ensure you have the following installed:
 
 ```bash
 # 1. Clone and install dependencies
-git clone https://github.com/your-org/mortgage-platform.git
-cd mortgage-platform
+git clone https://github.com/mariano-aguero/aws-example.git
+cd aws-example
 make install
 
 # 2. Start local environment (LocalStack + seed data)

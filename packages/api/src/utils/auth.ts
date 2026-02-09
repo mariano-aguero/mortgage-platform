@@ -61,7 +61,10 @@ export function extractUser(event: APIGatewayProxyEvent): AuthenticatedUser | nu
   let role: UserRole = 'borrower';
   if (groupsStr.toLowerCase().includes('admin')) {
     role = 'admin';
-  } else if (groupsStr.toLowerCase().includes('loanofficer') || groupsStr.toLowerCase().includes('loan_officer')) {
+  } else if (
+    groupsStr.toLowerCase().includes('loanofficer') ||
+    groupsStr.toLowerCase().includes('loan_officer')
+  ) {
     role = 'loan_officer';
   }
 

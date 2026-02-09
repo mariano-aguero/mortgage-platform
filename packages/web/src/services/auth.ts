@@ -21,8 +21,7 @@ import type { AuthUser, SignInInput, SignUpInput } from '@/types';
 // Check if we should skip authentication (local development only)
 // Both conditions must be true: SKIP_AUTH enabled AND environment is local
 const SKIP_AUTH =
-  import.meta.env.VITE_SKIP_AUTH === 'true' &&
-  import.meta.env.VITE_ENVIRONMENT === 'local';
+  import.meta.env.VITE_SKIP_AUTH === 'true' && import.meta.env.VITE_ENVIRONMENT === 'local';
 
 // Mock user for local development
 const MOCK_USERS: Record<string, { password: string; user: AuthUser }> = {

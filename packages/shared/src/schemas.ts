@@ -1,10 +1,5 @@
 import { z } from 'zod';
-import {
-  ApplicationStatus,
-  PROPERTY_TYPES,
-  LOAN_TYPES,
-  EMPLOYMENT_STATUSES,
-} from './types';
+import { ApplicationStatus, PROPERTY_TYPES, LOAN_TYPES, EMPLOYMENT_STATUSES } from './types';
 
 /**
  * Borrower Information Schema

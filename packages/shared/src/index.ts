@@ -1,8 +1,5 @@
 // Types
-import {
-  ApplicationStatus,
-  VALID_STATUS_TRANSITIONS,
-} from './types';
+import { ApplicationStatus, VALID_STATUS_TRANSITIONS } from './types';
 
 export {
   ApplicationStatus,
@@ -41,16 +38,12 @@ export {
   SignUpSchema,
 } from './schemas';
 
-export type {
-  BorrowerInfoInput,
-  PropertyInfoInput,
-  MortgageApplicationInput,
-} from './schemas';
+export type { BorrowerInfoInput, PropertyInfoInput, MortgageApplicationInput } from './schemas';
 
 // Utility functions
 export function isValidStatusTransition(
   currentStatus: ApplicationStatus,
-  newStatus: ApplicationStatus
+  newStatus: ApplicationStatus,
 ): boolean {
   return VALID_STATUS_TRANSITIONS[currentStatus].includes(newStatus);
 }
@@ -58,7 +51,7 @@ export function isValidStatusTransition(
 export function calculateMonthlyPayment(
   loanAmount: number,
   annualInterestRate: number,
-  loanTermMonths: number
+  loanTermMonths: number,
 ): number {
   const monthlyRate = annualInterestRate / 100 / 12;
   if (monthlyRate === 0) return loanAmount / loanTermMonths;

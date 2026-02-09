@@ -45,8 +45,7 @@ export function getLocalStackEndpoint(): string {
 export function isAuthSkipped(): boolean {
   // Only skip auth in local environment with explicit flag
   return (
-    import.meta.env['VITE_SKIP_AUTH'] === 'true' &&
-    import.meta.env['VITE_ENVIRONMENT'] === 'local'
+    import.meta.env['VITE_SKIP_AUTH'] === 'true' && import.meta.env['VITE_ENVIRONMENT'] === 'local'
   );
 }
 
